@@ -1,0 +1,132 @@
+
+version: '3'
+services:
+
+  frontend_ctr:
+    build:
+      context: frontend_ctr
+      dockerfile: ./Dockerfile
+    hostname: frontend_ctr
+    expose:
+     - "2000"
+    ports:
+     - "${FRONTEND_SERVICE_HTTP_BIND_ADDR?frontend_service.http.bind_addr must be set by the calling environment}:2000"
+    environment:
+     - FRONTEND_SERVICE_HTTP_BIND_ADDR=0.0.0.0:2000
+     - LUGGAGE_SERVICE_HTTP_DIAL_ADDR=luggage_ctr:2000
+     - RESERV_SERVICE_HTTP_DIAL_ADDR=reserv_ctr:2000
+     - REVIEW_SERVICE_HTTP_DIAL_ADDR=review_ctr:2000
+     - SEARCH_SERVICE_HTTP_DIAL_ADDR=search_ctr:2000
+     - USER_SERVICE_HTTP_DIAL_ADDR=user_ctr:2000
+    restart: always
+
+  luggage_ctr:
+    build:
+      context: luggage_ctr
+      dockerfile: ./Dockerfile
+    hostname: luggage_ctr
+    expose:
+     - "2000"
+    ports:
+     - "${LUGGAGE_SERVICE_HTTP_BIND_ADDR?luggage_service.http.bind_addr must be set by the calling environment}:2000"
+    environment:
+     - LUGGAGE_DB_DIAL_ADDR=luggage_db_ctr:3306
+     - LUGGAGE_SERVICE_HTTP_BIND_ADDR=0.0.0.0:2000
+    restart: always
+
+  luggage_db_ctr:
+    image: mysql/mysql-server
+    hostname: luggage_db_ctr
+    expose:
+     - "3306"
+    ports:
+     - "${LUGGAGE_DB_BIND_ADDR?luggage_db.bind_addr must be set by the calling environment}:3306"
+    environment:
+     - MYSQL_ROOT_HOST=%
+     - MYSQL_ROOT_PASSWORD=pass
+    restart: always
+
+  reserv_ctr:
+    build:
+      context: reserv_ctr
+      dockerfile: ./Dockerfile
+    hostname: reserv_ctr
+    expose:
+     - "2000"
+    ports:
+     - "${RESERV_SERVICE_HTTP_BIND_ADDR?reserv_service.http.bind_addr must be set by the calling environment}:2000"
+    environment:
+     - RESERV_DB_DIAL_ADDR=reserv_db_ctr:27017
+     - RESERV_SERVICE_HTTP_BIND_ADDR=0.0.0.0:2000
+    restart: always
+
+  reserv_db_ctr:
+    image: mongo
+    hostname: reserv_db_ctr
+    expose:
+     - "27017"
+    ports:
+     - "${RESERV_DB_BIND_ADDR?reserv_db.bind_addr must be set by the calling environment}:27017"
+    restart: always
+
+  review_ctr:
+    build:
+      context: review_ctr
+      dockerfile: ./Dockerfile
+    hostname: review_ctr
+    expose:
+     - "2000"
+    ports:
+     - "${REVIEW_SERVICE_HTTP_BIND_ADDR?review_service.http.bind_addr must be set by the calling environment}:2000"
+    environment:
+     - REVIEW_DB_DIAL_ADDR=review_db_ctr:27017
+     - REVIEW_SERVICE_HTTP_BIND_ADDR=0.0.0.0:2000
+    restart: always
+
+  review_db_ctr:
+    image: mongo
+    hostname: review_db_ctr
+    expose:
+     - "27017"
+    ports:
+     - "${REVIEW_DB_BIND_ADDR?review_db.bind_addr must be set by the calling environment}:27017"
+    restart: always
+
+  search_ctr:
+    build:
+      context: search_ctr
+      dockerfile: ./Dockerfile
+    hostname: search_ctr
+    expose:
+     - "2000"
+    ports:
+     - "${SEARCH_SERVICE_HTTP_BIND_ADDR?search_service.http.bind_addr must be set by the calling environment}:2000"
+    environment:
+     - LUGGAGE_SERVICE_HTTP_DIAL_ADDR=luggage_ctr:2000
+     - RESERV_SERVICE_HTTP_DIAL_ADDR=reserv_ctr:2000
+     - SEARCH_SERVICE_HTTP_BIND_ADDR=0.0.0.0:2000
+    restart: always
+
+  user_ctr:
+    build:
+      context: user_ctr
+      dockerfile: ./Dockerfile
+    hostname: user_ctr
+    expose:
+     - "2000"
+    ports:
+     - "${USER_SERVICE_HTTP_BIND_ADDR?user_service.http.bind_addr must be set by the calling environment}:2000"
+    environment:
+     - USER_DB_DIAL_ADDR=user_db_ctr:27017
+     - USER_SERVICE_HTTP_BIND_ADDR=0.0.0.0:2000
+    restart: always
+
+  user_db_ctr:
+    image: mongo
+    hostname: user_db_ctr
+    expose:
+     - "27017"
+    ports:
+     - "${USER_DB_BIND_ADDR?user_db.bind_addr must be set by the calling environment}:27017"
+    restart: always
+
